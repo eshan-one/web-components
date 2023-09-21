@@ -15,15 +15,14 @@
   </head>
   <body>
     <vaadin-multi-select-combo-box
-      label="Element"
+      label="Country"
       clear-button-visible
       required
       error-message="Select at least one"
       allow-custom-value
       style="width: 300px"
-    >
-      <vaadin-tooltip slot="tooltip" text="Vaadin multi-select-combo-box tooltip text"></vaadin-tooltip>
-    </vaadin-multi-select-combo-box>
+      group-selected-items
+    ></vaadin-multi-select-combo-box>
 
     <!--
     <vaadin-multi-select-combo-box
@@ -37,6 +36,9 @@
     <script>
       const comboBox = document.querySelector('vaadin-multi-select-combo-box');
 
+      comboBox.selectedItems = ['Andorra'];
+
+      /*
       comboBox.items = [
         'Hydrogen',
         'Helium',
@@ -71,7 +73,24 @@
       ];
 
       comboBox.selectedItems = ['Hydrogen', 'Helium', 'Lithium'];
+      */
 
+      comboBox.dataProvider = async (params, callback) => {
+        console.log(JSON.stringify(params));
+        const index = params.page * params.pageSize;
+        const response = await fetch(
+          `https://demo.vaadin.com/demo-data/1.0/filtered-countries?index=${index}&count=${params.pageSize}&filter=${params.filter}`,
+        );
+        if (response.ok) {
+          const { result, size } = await response.json();
+          // Emulate network latency for demo purpose
+          setTimeout(() => {
+            callback(result, size);
+          }, 100);
+        }
+      };
+
+      /*
       comboBox.addEventListener('custom-value-set', (event) => {
         const item = event.detail;
         comboBox.items.push(item);
@@ -82,6 +101,7 @@
       comboBox.addEventListener('change', () => {
         console.log('change', comboBox.selectedItems);
       });
+      */
 
       /*
       comboBox.items = [

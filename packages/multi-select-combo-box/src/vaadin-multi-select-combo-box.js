@@ -229,6 +229,14 @@ class MultiSelectComboBox extends ResizeMixin(InputControlMixin(ThemableMixin(El
       },
 
       /**
+       * Set to true to group selected items at the top of the overlay.
+       */
+      groupSelectedItems: {
+        type: Boolean,
+        value: false,
+      },
+
+      /**
        * A full set of items to filter the visible options from.
        * The items can be of either `String` or `Object` type.
        */
@@ -438,13 +446,11 @@ class MultiSelectComboBox extends ResizeMixin(InputControlMixin(ThemableMixin(El
       /** @private */
       __effectiveItems: {
         type: Array,
-        computed: '__computeEffectiveItems(items, selectedItems, readonly)',
       },
 
       /** @private */
       __effectiveFilteredItems: {
         type: Array,
-        computed: '__computeEffectiveFilteredItems(items, filteredItems, selectedItems, readonly)',
       },
 
       /** @private */
@@ -471,6 +477,8 @@ class MultiSelectComboBox extends ResizeMixin(InputControlMixin(ThemableMixin(El
     return [
       '_selectedItemsChanged(selectedItems, selectedItems.*)',
       '__updateOverflowChip(_overflow, _overflowItems, disabled, readonly)',
+      '__updateEffectiveItems(items, selectedItems, readonly, groupSelectedItems, opened)',
+      '__updateEffectiveFilteredItems(filteredItems, selectedItems, readonly, groupSelectedItems, opened)',
     ];
   }
 
@@ -1139,13 +1147,49 @@ class MultiSelectComboBox extends ResizeMixin(InputControlMixin(ThemableMixin(El
   }
 
   /** @private */
-  __computeEffectiveItems(items, selectedItems, readonly) {
-    return items && readonly ? selectedItems : items;
+  __updateEffectiveFilteredItems(filteredItems, selectedItems, readonly, groupSelectedItems, opened) {
+    const items = Array.isArray(filteredItems) ? [...filteredItems] : [];
+
+    // When the component is read-only, only show selected items
+    if (readonly && items) {
+      this.__effectiveFilteredItems = selectedItems;
+      return;
+    }
+
+    // When grouping is enabled, sort items to show selected items
+    // at the top, but only apply this after the overlay is closed
+    if (!opened && groupSelectedItems) {
+      this.__effectiveFilteredItems = [...selectedItems, ...items.filter((item) => !selectedItems.includes(item))];
+    }
+
+    // If no grouping enabled, just pass the items array as is
+    if (!groupSelectedItems) {
+      this.__effectiveFilteredItems = items;
+    }
   }
 
   /** @private */
-  __computeEffectiveFilteredItems(items, filteredItems, selectedItems, readonly) {
-    return !items && readonly ? selectedItems : filteredItems;
+  __updateEffectiveItems(items, selectedItems, readonly, groupSelectedItems, opened) {
+    if (!items) {
+      return;
+    }
+
+    // When the component is read-only, only show selected items
+    if (readonly) {
+      this.__effectiveItems = selectedItems;
+      return;
+    }
+
+    // When grouping is enabled, sort items to show selected items
+    // at the top, but only apply this after the overlay is closed
+    if (!opened && groupSelectedItems) {
+      this.__effectiveItems = [...selectedItems, ...items.filter((item) => !selectedItems.includes(item))];
+    }
+
+    // If no grouping enabled, just pass the items array as is
+    if (!groupSelectedItems) {
+      this.__effectiveItems = items;
+    }
   }
 }
 
