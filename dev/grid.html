@@ -8,6 +8,15 @@
     <script type="module" src="./common.js"></script>
   </head>
   <body>
+    <style>
+      vaadin-grid {
+        background-color: rgb(184, 251, 245);
+      }
+
+      vaadin-grid::part(odd-row) {
+        background-color: rgb(166, 231, 226);
+      }
+    </style>
     <script type="module">
       import '@vaadin/grid/all-imports';
       import '@vaadin/tooltip';

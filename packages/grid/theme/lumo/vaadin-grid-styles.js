@@ -27,6 +27,17 @@ registerStyles(
       --_lumo-grid-secondary-border-color: var(--lumo-contrast-10pct);
       --_lumo-grid-border-width: 1px;
       --_lumo-grid-selected-row-color: var(--lumo-primary-color-10pct);
+
+      background-color: var(--lumo-base-color);
+    }
+
+    #scroller,
+    table,
+    thead,
+    tbody,
+    tfoot,
+    [part~='row'] {
+      background: inherit;
     }
 
     /* No (outer) border */
@@ -43,7 +54,6 @@ registerStyles(
 
     [part~='cell'] {
       min-height: var(--lumo-size-m);
-      background-color: var(--lumo-base-color);
     }
 
     [part~='cell'] ::slotted(vaadin-grid-cell-content) {
@@ -66,6 +76,7 @@ registerStyles(
 
     [part~='row'] {
       position: relative;
+      min-width: max-content;
     }
 
     [part~='row']:focus,
@@ -256,7 +267,8 @@ registerStyles(
       box-shadow: var(--lumo-box-shadow-s);
       /* TODO Use the same styles as for the cell element (reorder-ghost copies styles from the cell element) */
       padding: var(--lumo-space-s) var(--lumo-space-m) !important;
-    }
+    }import { background } from '../../../vaadin-lumo-styles/utilities/background';
+
 
     /* Column resizing */
 
@@ -280,6 +292,9 @@ registerStyles(
     }
 
     /* Frozen columns */
+    [frozen] {
+      background: inherit;
+    }
 
     [last-frozen] {
       border-right: var(--_lumo-grid-border-width) solid transparent;
