@@ -36,7 +36,8 @@ registerStyles(
     thead,
     tbody,
     tfoot,
-    [part~='row'] {
+    [part~='row'],
+    [frozen] {
       background: inherit;
     }
 
@@ -267,8 +268,7 @@ registerStyles(
       box-shadow: var(--lumo-box-shadow-s);
       /* TODO Use the same styles as for the cell element (reorder-ghost copies styles from the cell element) */
       padding: var(--lumo-space-s) var(--lumo-space-m) !important;
-    }import { background } from '../../../vaadin-lumo-styles/utilities/background';
-
+    }
 
     /* Column resizing */
 
@@ -292,9 +292,6 @@ registerStyles(
     }
 
     /* Frozen columns */
-    [frozen] {
-      background: inherit;
-    }
 
     [last-frozen] {
       border-right: var(--_lumo-grid-border-width) solid transparent;
