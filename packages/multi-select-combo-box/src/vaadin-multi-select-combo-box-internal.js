@@ -386,12 +386,12 @@ class MultiSelectComboBoxInternal extends ComboBoxDataProviderMixin(ComboBoxMixi
    * @protected
    * @override
    */
-  _shouldLoadPage(page) {
+  _shouldFetchData() {
     if (this.readonly) {
       return false;
     }
 
-    return super._shouldLoadPage(page);
+    return super._shouldFetchData();
   }
 
   /**
