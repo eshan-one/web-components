@@ -57,7 +57,7 @@ export const PasswordFieldMixin = (superClass) =>
     }
 
     static get observers() {
-      return ['__i18nChanged(i18n.*)'];
+      return ['__i18nChanged(i18n)'];
     }
 
     constructor() {
@@ -176,14 +176,14 @@ export const PasswordFieldMixin = (superClass) =>
 
     /** @private */
     __updateAriaLabel(i18n) {
-      if (i18n.reveal && this._revealNode) {
+      if (i18n && i18n.reveal && this._revealNode) {
         this._revealNode.setAttribute('aria-label', i18n.reveal);
       }
     }
 
     /** @private */
     __i18nChanged(i18n) {
-      this.__updateAriaLabel(i18n.base);
+      this.__updateAriaLabel(i18n);
     }
 
     /** @private */
