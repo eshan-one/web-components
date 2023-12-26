@@ -4,19 +4,19 @@ import {
   arrowLeft,
   arrowRight,
   arrowUp,
+  aTimeout,
   click,
   esc,
   fire,
   fixtureSync,
   isDesktopSafari as isSafari,
   nextRender,
+  nextUpdate,
   oneEvent,
   touchend,
   touchstart,
 } from '@vaadin/testing-helpers';
 import sinon from 'sinon';
-import './not-animated-styles.js';
-import '../vaadin-menu-bar.js';
 import { setCancelSyntheticClickEvents } from '@polymer/polymer/lib/utils/settings.js';
 import { isTouch } from '@vaadin/component-base/src/browser-utils.js';
 
@@ -232,6 +232,7 @@ describe('sub-menu', () => {
       { text: 'Menu Item 2', children: [{ text: 'Menu Item 2 1' }] },
       ...menu.items.slice(2),
     ];
+    await nextUpdate(menu);
     buttons = menu._buttons;
     await nextRender(menu);
     arrowDown(buttons[0]);
@@ -315,7 +316,7 @@ describe('sub-menu', () => {
     menu.style.position = 'absolute';
     menu.style.bottom = '50px';
     buttons[0].click();
-    await nextRender(subMenu);
+    await oneEvent(subMenuOverlay, 'vaadin-overlay-open');
     const overlayRect = subMenuOverlay.getBoundingClientRect();
     const buttonRect = buttons[0].getBoundingClientRect();
     expect(overlayRect.top + overlayRect.height).to.be.closeTo(buttonRect.top, 1);
@@ -330,7 +331,7 @@ describe('sub-menu', () => {
 
       it('should position end-aligned sub-menu to button right in LTR', async () => {
         buttons[2].click();
-        await nextRender(subMenu);
+        await oneEvent(subMenuOverlay, 'vaadin-overlay-open');
         const overlayRect = subMenuOverlay.getBoundingClientRect();
         const buttonRect = buttons[2].getBoundingClientRect();
         expect(overlayRect.right).to.be.closeTo(buttonRect.right, 1);
@@ -350,7 +351,7 @@ describe('sub-menu', () => {
 
       it('should position sub-menu in RTL to button right', async () => {
         buttons[0].click();
-        await nextRender(subMenu);
+        await oneEvent(subMenuOverlay, 'vaadin-overlay-open');
         const overlayRect = subMenuOverlay.getBoundingClientRect();
         const buttonRect = buttons[0].getBoundingClientRect();
         expect(overlayRect.right).to.be.closeTo(buttonRect.right, 1);
@@ -358,7 +359,7 @@ describe('sub-menu', () => {
 
       it('should position end-aligned sub-menu in RTL to button left', async () => {
         buttons[2].click();
-        await nextRender(subMenu);
+        await oneEvent(subMenuOverlay, 'vaadin-overlay-open');
         const overlayRect = subMenuOverlay.getBoundingClientRect();
         const buttonRect = buttons[2].getBoundingClientRect();
         expect(overlayRect.left).to.be.closeTo(buttonRect.left, 1);
@@ -476,6 +477,7 @@ describe('open on hover', () => {
 
   it('should switch opened sub-menu on hover also when open-on-hover is false', async () => {
     menu.openOnHover = false;
+    await nextUpdate(menu);
     buttons[0].click();
     await nextRender(subMenu);
     fire(buttons[2], openOnHoverEvent);
@@ -589,8 +591,9 @@ describe('theme attribute', () => {
     expect(subMenu.getAttribute('theme')).to.be.equal('foo');
   });
 
-  it('should remove theme attribute from the submenu', () => {
+  it('should remove theme attribute from the submenu', async () => {
     menu.removeAttribute('theme');
+    await nextUpdate(menu);
     expect(subMenu.hasAttribute('theme')).to.be.false;
   });
 
@@ -601,7 +604,11 @@ describe('theme attribute', () => {
     expect(items[1].getAttribute('theme')).to.equal('foo');
 
     subMenu.close();
+    await nextUpdate(menu);
+
     menu.removeAttribute('theme');
+    await nextUpdate(menu);
+
     buttons[0].dispatchEvent(new CustomEvent(menuOpenEvent, { bubbles: true, composed: true }));
     await nextRender(subMenu);
 

@@ -1,19 +1,6 @@
 import { expect } from '@esm-bundle/chai';
-import { arrowRight, fixtureSync, nextFrame, nextRender } from '@vaadin/testing-helpers';
+import { arrowRight, fixtureSync, nextFrame, nextRender, nextUpdate } from '@vaadin/testing-helpers';
 import sinon from 'sinon';
-import './not-animated-styles.js';
-import '../vaadin-menu-bar.js';
-import { css, registerStyles } from '@vaadin/vaadin-themable-mixin/vaadin-themable-mixin.js';
-
-registerStyles(
-  'vaadin-menu-bar',
-  css`
-    :host([theme='big']) ::slotted(vaadin-menu-bar-button) {
-      width: 100px;
-    }
-  `,
-  { moduleId: 'vaadin-menu-bar-test-styles' },
-);
 
 // Utility function to assert a menu item is not visible
 const assertHidden = (elem) => {
@@ -57,11 +44,11 @@ describe('overflow', () => {
       wrapper = fixtureSync(`
         <div style="display: flex">
           <div style="width: 100px;"></div>
-          <vaadin-menu-bar style="width: 250px"></vaadin-menu-bar>
+          <vaadin-menu-bar style="width: 200px"></vaadin-menu-bar>
         </div>
       `);
       menu = wrapper.querySelector('vaadin-menu-bar');
-
+      await nextRender(menu);
       menu.items = [
         { text: 'Item 1' },
         { text: 'Item 2' },
@@ -69,7 +56,7 @@ describe('overflow', () => {
         { text: 'Item 4' },
         { text: 'Item 5', disabled: true },
       ];
-      await nextRender(menu);
+      await nextUpdate(menu);
       buttons = menu._buttons;
       overflow = buttons[buttons.length - 1];
     });
@@ -91,8 +78,9 @@ describe('overflow', () => {
       expect(overflow.item.children[2]).to.deep.equal(menu.items[4]);
     });
 
-    it('should show overflow button after assigning the same items', () => {
+    it('should show overflow button after assigning the same items', async () => {
       menu.items = [...menu.items];
+      await nextUpdate(menu);
       expect(overflow.hasAttribute('hidden')).to.be.false;
     });
 
@@ -174,6 +162,7 @@ describe('overflow', () => {
       await onceResized(menu);
       expect(overflow.hasAttribute('hidden')).to.be.true;
       menu.setAttribute('theme', 'big');
+      await nextUpdate(menu);
       assertHidden(buttons[3]);
       assertHidden(buttons[4]);
       expect(overflow.hasAttribute('hidden')).to.be.false;
@@ -192,15 +181,17 @@ describe('overflow', () => {
       expect(buttons[0].getAttribute('tabindex')).to.equal('0');
     });
 
-    it('should set the aria-label of the overflow button according to the i18n of the menu bar', () => {
+    it('should set the aria-label of the overflow button according to the i18n of the menu bar', async () => {
       const moreOptionsSv = 'Fler alternativ';
       expect(overflow.getAttribute('aria-label')).to.equal('More options');
       menu.i18n = { ...menu.i18n, moreOptions: moreOptionsSv };
+      await nextUpdate(menu);
       expect(overflow.getAttribute('aria-label')).to.equal(moreOptionsSv);
     });
 
-    it('should remove the aria-label from the overflow button when empty i18n string is set', () => {
+    it('should remove the aria-label from the overflow button when empty i18n string is set', async () => {
       menu.i18n = { ...menu.i18n, moreOptions: '' };
+      await nextUpdate(menu);
       expect(overflow.hasAttribute('aria-label')).to.be.false;
     });
   });
@@ -247,11 +238,13 @@ describe('overflow', () => {
       await onceResized(menu);
 
       menu.setAttribute('theme', 'big');
+      await nextUpdate(menu);
       expect(menu.hasAttribute('has-single-button')).to.be.true;
     });
 
-    it('should set when changing items to only have one button', () => {
+    it('should set when changing items to only have one button', async () => {
       menu.items = [{ text: 'Actions' }];
+      await nextUpdate(menu);
       expect(menu.hasAttribute('has-single-button')).to.be.true;
     });
 
@@ -260,6 +253,7 @@ describe('overflow', () => {
       await onceResized(menu);
 
       menu.items = [{ text: 'Actions' }];
+      await nextUpdate(menu);
       expect(menu.hasAttribute('has-single-button')).to.be.true;
     });
 
@@ -268,6 +262,7 @@ describe('overflow', () => {
       await nextFrame();
 
       menu.items = [{ text: 'Edit' }, { text: 'Delete' }];
+      await nextUpdate(menu);
       expect(menu.hasAttribute('has-single-button')).to.be.false;
     });
   });
@@ -321,6 +316,7 @@ describe('overflow', () => {
 
     it('should keep buttons disabled when resizing', async () => {
       menu.disabled = true;
+      await nextUpdate(menu);
       container.style.width = '150px';
       await onceResized(menu);
       buttons.forEach((btn) => {
@@ -440,6 +436,7 @@ describe('overflow', () => {
       expect(listBox.items[0].firstChild).to.equal(menu.items[2].component);
       expect(listBox.items[0].firstChild.localName).to.equal('div');
       subMenu.close();
+      await nextUpdate(menu);
       menu.style.width = 'auto';
       await onceResized(menu);
       const item = buttons[2].firstChild;
@@ -453,6 +450,7 @@ describe('overflow', () => {
       overflow.click();
       await nextRender(subMenu);
       subMenu.close();
+      await nextUpdate(menu);
       menu.style.width = 'auto';
       await onceResized(menu);
       expect(item.getAttributeNames()).to.have.members(itemAttributes);
@@ -465,6 +463,7 @@ describe('overflow', () => {
       overflow.click();
       await nextRender(subMenu);
       subMenu.close();
+      await nextUpdate(menu);
       menu.style.width = 'auto';
       await onceResized(menu);
       expect(item.classList.contains('test-class-1')).to.be.true;
