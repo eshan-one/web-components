@@ -1,9 +1,7 @@
 import { expect } from '@esm-bundle/chai';
-import { fixtureSync, nextRender, outsideClick } from '@vaadin/testing-helpers';
+import { fixtureSync, nextRender, nextUpdate, outsideClick } from '@vaadin/testing-helpers';
 import { sendKeys } from '@web/test-runner-commands';
 import sinon from 'sinon';
-import './not-animated-styles.js';
-import '../vaadin-combo-box.js';
 
 describe('validation', () => {
   let comboBox, input;
@@ -11,9 +9,10 @@ describe('validation', () => {
   describe('basic', () => {
     let validateSpy, changeSpy;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       comboBox = fixtureSync('<vaadin-combo-box></vaadin-combo-box>');
       comboBox.items = ['foo', 'bar', 'baz'];
+      await nextRender();
       input = comboBox.inputElement;
       validateSpy = sinon.spy(comboBox, 'validate');
       changeSpy = sinon.spy();
@@ -32,18 +31,22 @@ describe('validation', () => {
       expect(validateSpy.calledOnce).to.be.true;
     });
 
-    it('should validate on outside click', () => {
+    it('should validate on outside click', async () => {
       input.focus();
       input.click();
+      await nextUpdate(comboBox);
       outsideClick();
+      await nextUpdate(comboBox);
       expect(validateSpy.calledOnce).to.be.true;
     });
 
     it('should validate before change event on outside click', async () => {
       input.focus();
       input.click();
+      await nextUpdate(comboBox);
       await sendKeys({ type: 'foo' });
       outsideClick();
+      await nextUpdate(comboBox);
       expect(changeSpy.calledOnce).to.be.true;
       expect(validateSpy.calledOnce).to.be.true;
       expect(validateSpy.calledBefore(changeSpy)).to.be.true;
@@ -67,9 +70,10 @@ describe('validation', () => {
       expect(validateSpy.calledBefore(changeSpy)).to.be.true;
     });
 
-    it('should validate before change event on clear button click', () => {
+    it('should validate before change event on clear button click', async () => {
       comboBox.clearButtonVisible = true;
       comboBox.value = 'foo';
+      await nextUpdate(comboBox);
       validateSpy.resetHistory();
       comboBox.$.clearButton.click();
       expect(changeSpy.calledOnce).to.be.true;
@@ -87,10 +91,11 @@ describe('validation', () => {
       expect(event.detail.valid).to.be.true;
     });
 
-    it('should fire a validated event on validation failure', () => {
+    it('should fire a validated event on validation failure', async () => {
       const validatedSpy = sinon.spy();
       comboBox.addEventListener('validated', validatedSpy);
       comboBox.required = true;
+      await nextUpdate(comboBox);
       comboBox.validate();
 
       expect(validatedSpy.calledOnce).to.be.true;
@@ -116,10 +121,11 @@ describe('validation', () => {
   });
 
   describe('required', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       comboBox = fixtureSync('<vaadin-combo-box></vaadin-combo-box>');
       comboBox.items = ['foo', 'bar', 'baz'];
       comboBox.required = true;
+      await nextRender();
       input = comboBox.inputElement;
     });
 

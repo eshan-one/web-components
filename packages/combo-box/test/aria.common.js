@@ -1,15 +1,14 @@
 import { expect } from '@esm-bundle/chai';
-import { arrowDownKeyDown, escKeyDown, fixtureSync, nextFrame } from '@vaadin/testing-helpers';
-import './not-animated-styles.js';
-import '../vaadin-combo-box.js';
+import { arrowDownKeyDown, escKeyDown, fixtureSync, nextRender, nextUpdate } from '@vaadin/testing-helpers';
 import { getAllItems } from './helpers.js';
 
 describe('ARIA', () => {
   let comboBox, input;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     comboBox = fixtureSync('<vaadin-combo-box></vaadin-combo-box>');
     comboBox.items = ['foo', 'bar', 'baz'];
+    await nextRender();
     input = comboBox.inputElement;
   });
 
@@ -32,8 +31,8 @@ describe('ARIA', () => {
 
     beforeEach(async () => {
       arrowDownKeyDown(input);
+      await nextUpdate(comboBox);
       items = getAllItems(comboBox);
-      await nextFrame();
     });
 
     it('should set aria-activedescendant on the input element depending on the focused item', () => {
@@ -43,12 +42,14 @@ describe('ARIA', () => {
       expect(input.getAttribute('aria-activedescendant')).to.equal(items[1].id);
     });
 
-    it('should set aria-selected on item elements depending on the selected item', () => {
+    it('should set aria-selected on item elements depending on the selected item', async () => {
       comboBox.value = 'foo';
+      await nextUpdate(comboBox);
       expect(items[0].getAttribute('aria-selected')).to.equal('true');
       expect(items[1].getAttribute('aria-selected')).to.equal('false');
 
       comboBox.value = 'bar';
+      await nextUpdate(comboBox);
       expect(items[0].getAttribute('aria-selected')).to.equal('false');
       expect(items[1].getAttribute('aria-selected')).to.equal('true');
     });

@@ -1,16 +1,15 @@
 import { expect } from '@esm-bundle/chai';
-import { fixtureSync } from '@vaadin/testing-helpers';
+import { aTimeout, fixtureSync, nextRender, nextUpdate } from '@vaadin/testing-helpers';
 import sinon from 'sinon';
-import './not-animated-styles.js';
-import '../vaadin-combo-box.js';
 import { getAllItems, getFirstItem, setInputValue } from './helpers.js';
 
 describe('item renderer', () => {
   let comboBox;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     comboBox = fixtureSync('<vaadin-combo-box></vaadin-combo-box>');
     comboBox.items = ['foo', 'bar', 'baz'];
+    await nextRender();
   });
 
   afterEach(() => {
@@ -18,9 +17,10 @@ describe('item renderer', () => {
   });
 
   describe('arguments', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       comboBox.renderer = sinon.spy();
       comboBox.opened = true;
+      await nextRender();
     });
 
     it(`should pass the 'root', 'owner', 'model' arguments to the renderer`, () => {
@@ -36,16 +36,18 @@ describe('item renderer', () => {
       });
     });
 
-    it(`should change the 'model.selected' property`, () => {
+    it(`should change the 'model.selected' property`, async () => {
       comboBox.value = 'foo';
+      await nextUpdate(comboBox);
 
       const model = comboBox.renderer.lastCall.args[2];
 
       expect(model.selected).to.be.true;
     });
 
-    it(`should change the 'model.focused' property`, () => {
+    it(`should change the 'model.focused' property`, async () => {
       comboBox._focusedIndex = 0;
+      await nextUpdate(comboBox);
 
       const model = comboBox.renderer.lastCall.args[2];
 
@@ -53,19 +55,21 @@ describe('item renderer', () => {
     });
   });
 
-  it('should use renderer when it is defined', () => {
+  it('should use renderer when it is defined', async () => {
     comboBox.renderer = (root, comboBox, model) => {
       const textNode = document.createTextNode(`${model.item} ${model.index}`);
       root.appendChild(textNode);
     };
     comboBox.opened = true;
+    await nextRender();
 
     expect(getFirstItem(comboBox).textContent.trim()).to.equal('foo 0');
   });
 
-  it('should run renderers when requesting content update', () => {
+  it('should run renderers when requesting content update', async () => {
     comboBox.renderer = sinon.spy();
     comboBox.opened = true;
+    await nextRender();
 
     expect(comboBox.renderer.callCount).to.be.equal(comboBox.items.length);
 
@@ -78,26 +82,29 @@ describe('item renderer', () => {
     expect(() => comboBox.requestContentUpdate()).not.to.throw(Error);
   });
 
-  it('should render the item label when removing the renderer', () => {
+  it('should render the item label when removing the renderer', async () => {
     comboBox.renderer = (root) => {
       root.textContent = 'bar';
     };
     comboBox.opened = true;
+    await nextRender();
 
     expect(getFirstItem(comboBox).textContent).to.equal('bar');
 
     comboBox.renderer = null;
+    await nextUpdate(comboBox);
 
     expect(getFirstItem(comboBox).textContent).to.equal('foo');
   });
 
-  it('should clear the old content after assigning a new renderer', () => {
+  it('should clear the old content after assigning a new renderer', async () => {
     comboBox.opened = true;
     comboBox.renderer = () => {};
+    await nextRender();
     expect(getFirstItem(comboBox).textContent).to.equal('');
   });
 
-  it('should restore filtered item content', () => {
+  it('should restore filtered item content', async () => {
     const contentNodes = comboBox.items.map((item) => document.createTextNode(item));
 
     comboBox.renderer = (root, _, { item }) => {
@@ -106,8 +113,14 @@ describe('item renderer', () => {
     };
 
     comboBox.opened = true;
+    await nextRender();
+
     setInputValue(comboBox, 'r');
+    await nextUpdate(comboBox);
+
     setInputValue(comboBox, '');
+    await nextUpdate(comboBox);
+
     expect(getAllItems(comboBox)[1].textContent).to.equal('bar');
   });
 });

@@ -1,6 +1,5 @@
 import { expect } from '@esm-bundle/chai';
-import { fixtureSync, nextFrame } from '@vaadin/testing-helpers';
-import '../src/vaadin-combo-box.js';
+import { fixtureSync, nextFrame, nextRender, nextUpdate } from '@vaadin/testing-helpers';
 import { flushComboBox, getViewportItems, scrollToIndex } from './helpers.js';
 
 describe('dynamic size change', () => {
@@ -26,13 +25,15 @@ describe('dynamic size change', () => {
       callback(items, size);
     }
 
-    beforeEach(() => {
+    beforeEach(async () => {
       comboBox = fixtureSync('<vaadin-combo-box></vaadin-combo-box>');
       comboBox.dataProvider = dataProvider;
+      await nextRender();
     });
 
     it('should not have item placeholders after size gets reduced', async () => {
       comboBox.opened = true;
+      await nextUpdate(comboBox);
       scrollToIndex(comboBox, comboBox.size - 1);
       flushComboBox(comboBox);
       await nextFrame();

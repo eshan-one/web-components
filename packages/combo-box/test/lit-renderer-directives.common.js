@@ -1,7 +1,6 @@
 import { expect } from '@esm-bundle/chai';
-import { fixtureSync, nextFrame } from '@vaadin/testing-helpers';
+import { aTimeout, fixtureSync, nextFrame, nextRender, nextUpdate, oneEvent } from '@vaadin/testing-helpers';
 import sinon from 'sinon';
-import '../vaadin-combo-box.js';
 import { html, render } from 'lit';
 import { comboBoxRenderer } from '../lit.js';
 import { getAllItems } from './helpers.js';
@@ -40,8 +39,9 @@ describe('lit renderer directives', () => {
         expect(comboBox.renderer).not.to.exist;
       });
 
-      it('should render items with the renderer when the combo-box is opened', () => {
+      it('should render items with the renderer when the combo-box is opened', async () => {
         comboBox.opened = true;
+        await nextRender();
         const items = getAllItems(comboBox);
         expect(items[0].textContent).to.equal('Item');
       });
@@ -60,11 +60,12 @@ describe('lit renderer directives', () => {
       beforeEach(async () => {
         rendererSpy = sinon.spy();
         render(
-          html`<vaadin-combo-box opened .items="${['Item']}" ${comboBoxRenderer(rendererSpy)}></vaadin-combo-box>`,
+          html`<vaadin-combo-box .items="${['Item']}" opened ${comboBoxRenderer(rendererSpy)}></vaadin-combo-box>`,
           container,
         );
-        await nextFrame();
         comboBox = container.querySelector('vaadin-combo-box');
+        await nextRender();
+        await aTimeout(100);
       });
 
       it('should pass the item to the renderer', () => {
