@@ -1,6 +1,6 @@
 {
   "name": "@vaadin/charts",
-  "version": "24.4.0-dev.b3e1d14600",
+  "version": "24.4.0-dev.223e39f050",
   "publishConfig": {
     "access": "public"
   },
@@ -36,10 +36,10 @@
   ],
   "dependencies": {
     "@polymer/polymer": "^3.0.0",
-    "@vaadin/component-base": "24.4.0-dev.b3e1d14600",
-    "@vaadin/vaadin-lumo-styles": "24.4.0-dev.b3e1d14600",
-    "@vaadin/vaadin-material-styles": "24.4.0-dev.b3e1d14600",
-    "@vaadin/vaadin-themable-mixin": "24.4.0-dev.b3e1d14600",
+    "@vaadin/component-base": "24.4.0-dev.223e39f050",
+    "@vaadin/vaadin-lumo-styles": "24.4.0-dev.223e39f050",
+    "@vaadin/vaadin-material-styles": "24.4.0-dev.223e39f050",
+    "@vaadin/vaadin-themable-mixin": "24.4.0-dev.223e39f050",
     "highcharts": "9.2.2"
   },
   "devDependencies": {
